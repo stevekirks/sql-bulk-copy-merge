@@ -1,0 +1,1 @@
+﻿Docker is required as these tests run a docker container.

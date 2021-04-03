@@ -1,0 +1,11 @@
+﻿version: "2.1"
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: SqlBulkCopyMerge-Testing
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=thisStrong(!)Password
+    ports:
+      - 41433:1433
+    restart: unless-stopped
