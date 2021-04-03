@@ -1,10 +1,10 @@
 ﻿# SQL Bulk Copy & Merge
 
-This library aims to make copying table data between SQL databases easier.
+This library aims to make easier and more efficient specific workflows in .NET that copy table data between SQL databases.
 
 SQLBulkCopy is useful to copy between databases, but truncating the destination table each time before copying is not always possible or efficient.
-An alternative is to use SQLBulkCopy to copy to a temporary table and then run SQL MERGE between the temporary table and target.
-Some other solutions that do this require extra work defining the table schemas or are dependant on a stored proc.
+An alternative workflow is to use SQLBulkCopy to copy to a temporary table and then run SQL MERGE between the temporary table and target.
+Some other solutions that do this require extra work defining the table schemas or are dependant on a SQL stored proc.
 
 This .NET library has the following methods:
 
@@ -22,7 +22,7 @@ The specific steps it performs:
 ### Usage:
 ```
 var copyService = new SqlBulkCopyMergeService(sourceDbConnectionString, targetDbConnectionString);
-var result = await copyService.CopyAndMerge(sourceTable, targetTable);
+var result = await copyService.CopyAndMerge(sourceTableOrView, targetTable);
 Console.WriteLine("Rows Inserted: " + result.Inserted);
 Console.WriteLine("Rows Updated: " + result.Updated);
 Console.WriteLine("Rows Deleted: " + result.Deleted);
@@ -35,7 +35,7 @@ var columnMappings = new List<ColumnMapping>
     new ColumnMapping("id", "code"),
     new ColumnMapping("notes", "description")
 };
-var result = await copyService.CopyAndMerge(sourceTable, targetTable, columnMappings);
+var result = await copyService.CopyAndMerge(sourceTableOrView, targetTable, columnMappings);
 ```
 
 ## CopyLatest
@@ -52,7 +52,7 @@ The result of the source query is directly copied into the target table using SQ
 ### Usage:
 ```
 var copyService = new SqlBulkCopyMergeService(sourceDbConnectionString, targetDbConnectionString);
-var result = await copyService.CopyLatest(sourceTable, targetTable, keyColumnName);
+var result = await copyService.CopyLatest(sourceTableOrView, targetTable, keyColumnName);
 Console.WriteLine("Rows Copied: " + result.RowsCopied);
 ```
 

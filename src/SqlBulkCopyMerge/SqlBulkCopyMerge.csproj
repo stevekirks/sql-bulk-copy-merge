@@ -4,7 +4,7 @@
     <Authors>Steve Kirkegard</Authors>
     <Product>SqlBulkCopyMerge</Product>
     <TargetFrameworks>netstandard2.1;net5.0</TargetFrameworks>
-    <Description>Copy data from a table in one database to a table in another database. It does not TRUNCATE the target table. Uses SQLBulkCopy behind the scenes.</Description>
+    <Description>This library aims to make easier and more efficient specific workflows in .NET that copy table data between SQL databases.</Description>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
