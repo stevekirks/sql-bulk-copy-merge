@@ -1,6 +1,6 @@
 name: Publish
 env:
-  release_version: ${GITHUB_REF#refs/*/}
+  release_version: ${{GITHUB_REF#refs/*/}}
 
 on:
   release:
