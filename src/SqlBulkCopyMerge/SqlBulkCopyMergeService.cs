@@ -32,9 +32,10 @@ namespace SqlBulkCopyMerge
         /// </summary>
         /// <param name="sourceTable">Table in the source database</param>
         /// <param name="targetTable">Table in the target database</param>
+        /// <param name="columnMappings">Optional columns mappings. These are only necessary if the column names differ between source and target</param>
         /// <param name="copyAndMergeConfig">Optional config for the SQLBulkCopy and the SQL MERGE</param>
         /// <returns>Results of the copy and merge, including number of rows Inserted, Updated, and Deleted</returns>
-        Task<MergeResult> CopyAndMerge(string sourceTable, string targetTable, CopyAndMergeConfig copyAndMergeConfig = null);
+        Task<MergeResult> CopyAndMerge(string sourceTable, string targetTable, List<ColumnMapping> columnMappings = null, CopyAndMergeConfig copyAndMergeConfig = null);
 
         /// <summary>
         /// Copy data from table or view in source database to a temporary table in the target database
@@ -50,9 +51,10 @@ namespace SqlBulkCopyMerge
         /// <param name="sourceTable">Table in the source database</param>
         /// <param name="targetTable">Table in the target database</param>
         /// <param name="cancellationToken">Cancellation Token</param>
+        /// <param name="columnMappings">Optional columns mappings. These are only necessary if the column names differ between source and target</param>
         /// <param name="copyAndMergeConfig">Optional config for the SQLBulkCopy and the SQL MERGE</param>
         /// <returns>Results of the copy and merge, including number of rows Inserted, Updated, and Deleted</returns>
-        Task<MergeResult> CopyAndMerge(string sourceTable, string targetTable, CancellationToken cancellationToken, CopyAndMergeConfig copyAndMergeConfig = null);
+        Task<MergeResult> CopyAndMerge(string sourceTable, string targetTable, CancellationToken cancellationToken, List<ColumnMapping> columnMappings = null, CopyAndMergeConfig copyAndMergeConfig = null);
 
         /// <summary>
         /// Copy the latest data. The data to transfer is determined by the keyColumnName.
@@ -66,9 +68,10 @@ namespace SqlBulkCopyMerge
         /// <param name="sourceTable">The source table or view name in the source database. Eg. [schema].[table_name]</param>
         /// <param name="targetTable">The target table name in the target database. Eg. [schema].[table_name]</param>
         /// <param name="keyColumnName">The column name used to determine the latest data. Eg. [Id]</param>
+        /// <param name="columnMappings">Optional columns mappings. These are only necessary if the column names differ between source and target</param>
         /// <param name="sqlBulkCopyConfig">Optional config for the SQLBulkCopy</param>
         /// <returns>The number of Rows Copied</returns>
-        Task<int> CopyLatest(string sourceTable, string targetTable, string keyColumnName = null, SqlBulkCopyConfig sqlBulkCopyConfig = null);
+        Task<int> CopyLatest(string sourceTable, string targetTable, string keyColumnName = null, List<ColumnMapping> columnMappings = null, SqlBulkCopyConfig sqlBulkCopyConfig = null);
 
         /// <summary>
         /// Copy the latest data. The data to transfer is determined by the keyColumnName.
@@ -83,9 +86,10 @@ namespace SqlBulkCopyMerge
         /// <param name="targetTable">The target table name in the target database. Eg. [schema].[table_name]</param>
         /// <param name="cancellationToken">Cancellation Token</param>
         /// <param name="keyColumnName">The column name used to determine the latest data. Eg. [Id]</param>
+        /// <param name="columnMappings">Optional columns mappings. These are only necessary if the column names differ between source and target</param>
         /// <param name="sqlBulkCopyConfig">Optional config for the SQLBulkCopy</param>
         /// <returns>The number of Rows Copied</returns>
-        Task<int> CopyLatest(string sourceTable, string targetTable, CancellationToken cancellationToken, string keyColumnName = null, SqlBulkCopyConfig sqlBulkCopyConfig = null);
+        Task<int> CopyLatest(string sourceTable, string targetTable, CancellationToken cancellationToken, string keyColumnName = null, List<ColumnMapping> columnMappings = null, SqlBulkCopyConfig sqlBulkCopyConfig = null);
 
         /// <summary>
         /// SQL Bulk Copy
@@ -93,12 +97,12 @@ namespace SqlBulkCopyMerge
         /// <param name="sourceSelectQuery"></param>
         /// <param name="targetTable"></param>
         /// <param name="sqlParameters"></param>
-        /// <param name="columnMappings"></param>
+        /// <param name="columnMappings">Optional columns mappings. These are only necessary if the column names differ between source and target</param>
         /// <param name="sqlBulkCopyConfig"></param>
         /// <returns>The number of Rows Copied</returns>
         Task<int> SqlBulkCopy(string sourceSelectQuery, string targetTable,
-            List<SqlParameter> sqlParameters = null,
-            Dictionary<string, string> columnMappings = null,
+            IEnumerable<SqlParameter> sqlParameters = null,
+            IEnumerable<ColumnMapping> columnMappings = null,
             SqlBulkCopyConfig sqlBulkCopyConfig = null);
 
         /// <summary>
@@ -108,13 +112,13 @@ namespace SqlBulkCopyMerge
         /// <param name="targetTable"></param>
         /// <param name="cancellationToken"></param>
         /// <param name="sqlParameters"></param>
-        /// <param name="columnMappings"></param>
+        /// <param name="columnMappings">Optional columns mappings. These are only necessary if the column names differ between source and target</param>
         /// <param name="sqlBulkCopyConfig"></param>
         /// <returns>The number of Rows Copied</returns>
         Task<int> SqlBulkCopy(string sourceSelectQuery, string targetTable,
             CancellationToken cancellationToken,
-            List<SqlParameter> sqlParameters = null,
-            Dictionary<string, string> columnMappings = null,
+            IEnumerable<SqlParameter> sqlParameters = null,
+            IEnumerable<ColumnMapping> columnMappings = null,
             SqlBulkCopyConfig sqlBulkCopyConfig = null);
     }
 
@@ -137,23 +141,28 @@ namespace SqlBulkCopyMerge
 
         /// <inheritdoc />
         public async Task<int> CopyLatest(string sourceTable, string targetTable, string keyColumnName = null,
+            List<ColumnMapping> columnMappings = null,
             SqlBulkCopyConfig sqlBulkCopyConfig = null)
         {
-            return await CopyLatest(sourceTable, targetTable, CancellationToken.None, keyColumnName, sqlBulkCopyConfig);
+            return await CopyLatest(sourceTable, targetTable, CancellationToken.None, keyColumnName, columnMappings, sqlBulkCopyConfig);
         }
 
         /// <inheritdoc />
         public async Task<int> CopyLatest(string sourceTable, string targetTable, CancellationToken cancellationToken,
-            string keyColumnName = null, SqlBulkCopyConfig sqlBulkCopyConfig = null)
+            string keyColumnName = null, List<ColumnMapping> columnMappings = null, SqlBulkCopyConfig sqlBulkCopyConfig = null)
         {
             var sourceSchemaAndTable = sourceTable.FormatTableSchemaAndName();
             var targetSchemaAndTable = targetTable.FormatTableSchemaAndName();
             var sourceColumns = await GetColumnSchemaInfo(_sourceDbConnectionString, sourceTable);
             var targetColumns = await GetColumnSchemaInfo(_targetDbConnectionString, targetTable);
 
+            columnMappings = columnMappings.ValidateAndFormatColumnMappings(sourceColumns, targetColumns);
+
             if (keyColumnName == null)
             {
-                keyColumnName = targetColumns.FirstOrDefault(a => a.IsPrimaryKey && sourceColumns.Any(s => a.Name == s.Name))?.Name;
+                keyColumnName = targetColumns.FirstOrDefault(a => a.IsPrimaryKey 
+                                                                  && (sourceColumns.Any(s => string.Equals(a.Name, s.Name, StringComparison.InvariantCultureIgnoreCase))
+                                                                  || (columnMappings?.Any(s => string.Equals(a.Name, s.Target, StringComparison.InvariantCultureIgnoreCase)) == true)))?.Name;
                 if (keyColumnName == null)
                     throw new ArgumentException(
                         $"{nameof(keyColumnName)} must be specified as table has no primary key to use instead");
@@ -166,48 +175,54 @@ namespace SqlBulkCopyMerge
             var latestKeyColumnVal = await SqlUtils.ExecuteScalar(_targetDbConnectionString,
                 $"SELECT TOP 1 {keyColumnSchema.Name.AddSquareBrackets()} FROM {targetSchemaAndTable} ORDER BY {keyColumnSchema.Name.AddSquareBrackets()} DESC");
 
-            var b = new StringBuilder();
-            b.Append("SELECT ");
+            var sqlBulkCopyQuery = new StringBuilder();
+            sqlBulkCopyQuery.Append("SELECT ");
             var selectColumns = new List<string>();
-            foreach (var targetColumn in targetColumns)
+            if (columnMappings?.Any() == true)
             {
-                if (sourceColumns.Any(a => a.Name == targetColumn.Name))
-                {
-                    selectColumns.Add(targetColumn.Name.AddSquareBrackets());
-                }
+                selectColumns.AddRange(columnMappings.Select(a => a.Source));
             }
-
-            if (!selectColumns.Any())
-                throw new Exception("No column names between the source and target tables match");
-            b.AppendLine(string.Join(", ", selectColumns));
-            b.AppendLine($"FROM {sourceSchemaAndTable}");
+            else
+            {
+                foreach (var targetColumn in targetColumns)
+                {
+                    if (sourceColumns.Any(a => a.Name == targetColumn.Name))
+                    {
+                        selectColumns.Add(targetColumn.Name.AddSquareBrackets());
+                    }
+                }
+                if (!selectColumns.Any())
+                    throw new Exception("No column names between the source and target tables match");
+            }
+            sqlBulkCopyQuery.AppendLine(string.Join(", ", selectColumns));
+            sqlBulkCopyQuery.AppendLine($"FROM {sourceSchemaAndTable}");
 
             List<SqlParameter> sqlParameters = null;
             const string latestKeyValueLabel = "LatestKeyValue";
             if (latestKeyColumnVal != null)
             {
-                b.AppendLine($"WHERE {keyColumnName} > @{latestKeyValueLabel}");
+                sqlBulkCopyQuery.AppendLine($"WHERE {keyColumnName} > @{latestKeyValueLabel}");
                 sqlParameters = new List<SqlParameter>
                 {
-                    new(latestKeyValueLabel, keyColumnSchema.Type) {Value = latestKeyColumnVal}
+                    new SqlParameter(latestKeyValueLabel, keyColumnSchema.Type) {Value = latestKeyColumnVal}
                 };
             }
 
-            var result = await SqlBulkCopy(b.ToString(), targetSchemaAndTable, cancellationToken, 
-                sqlParameters, selectColumns.ToDictionary(a => a, a=> a), sqlBulkCopyConfig);
+            var result = await SqlBulkCopy(sqlBulkCopyQuery.ToString(), targetSchemaAndTable, cancellationToken, 
+                sqlParameters, columnMappings ?? selectColumns.Select(a => new ColumnMapping(a,a)), sqlBulkCopyConfig);
 
             return result;
         }
 
         /// <inheritdoc />
-        public async Task<MergeResult> CopyAndMerge(string sourceTable, string targetTable, CopyAndMergeConfig copyAndMergeConfig = null)
+        public async Task<MergeResult> CopyAndMerge(string sourceTable, string targetTable, List<ColumnMapping> columnMappings = null, CopyAndMergeConfig copyAndMergeConfig = null)
         {
-            return await CopyAndMerge(sourceTable, targetTable, CancellationToken.None, copyAndMergeConfig);
+            return await CopyAndMerge(sourceTable, targetTable, CancellationToken.None, columnMappings, copyAndMergeConfig);
         }
 
         /// <inheritdoc />
         public async Task<MergeResult> CopyAndMerge(string sourceTable, string targetTable, CancellationToken cancellationToken,
-            CopyAndMergeConfig copyAndMergeConfig = null)
+            List<ColumnMapping> columnMappings = null, CopyAndMergeConfig copyAndMergeConfig = null)
         {
             var sourceSchemaAndTable = sourceTable.FormatTableSchemaAndName();
             var targetSchemaAndTable = targetTable.FormatTableSchemaAndName();
@@ -215,6 +230,8 @@ namespace SqlBulkCopyMerge
 
             var sourceColumns = await GetColumnSchemaInfo(_sourceDbConnectionString, sourceTable);
             var targetColumns = await GetColumnSchemaInfo(_targetDbConnectionString, targetTable);
+
+            columnMappings = columnMappings.ValidateAndFormatColumnMappings(sourceColumns, targetColumns);
 
             var schemaExists = await SqlUtils.ExecuteScalar<bool>(_targetDbConnectionString,
                 $@"SELECT CASE WHEN EXISTS(SELECT * FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '{ts.TableSchema}') THEN 1 ELSE 0 END");
@@ -239,28 +256,39 @@ namespace SqlBulkCopyMerge
             await CreateTempTableInTarget(targetSchemaAndTable);
 
             var mergeScript = GenerateSqlMergeStatement(GetTempTableSchemaAndName(targetSchemaAndTable), targetSchemaAndTable,
-                targetColumns, targetColumns);
+                targetColumns, targetColumns, 
+                columnMappings?.Select(a => a.Target).ToList() ?? null, 
+                copyAndMergeConfig?.NoRowDeletion ?? false);
 
-            var b = new StringBuilder();
-            b.Append("SELECT ");
+            var sqlBulkCopyQuery = new StringBuilder();
+            sqlBulkCopyQuery.Append("SELECT ");
             var selectColumns = new List<string>();
-            foreach (var targetColumn in targetColumns)
+            if (columnMappings?.Any() == true)
             {
-                if (sourceColumns.Any(a => a.Name == targetColumn.Name))
-                {
-                    selectColumns.Add(targetColumn.Name.AddSquareBrackets());
-                }
+                selectColumns.AddRange(columnMappings.Select(a => a.Source));
             }
-            b.AppendLine(string.Join(", ", selectColumns));
-            b.AppendLine($"FROM {sourceSchemaAndTable}");
+            else
+            {
+                foreach (var targetColumn in targetColumns)
+                {
+                    if (sourceColumns.Any(a => a.Name == targetColumn.Name))
+                    {
+                        selectColumns.Add(targetColumn.Name.AddSquareBrackets());
+                    }
+                }
+                if (!selectColumns.Any())
+                    throw new Exception("No column names between the source and target tables match");
+            }
+            sqlBulkCopyQuery.AppendLine(string.Join(", ", selectColumns));
+            sqlBulkCopyQuery.AppendLine($"FROM {sourceSchemaAndTable}");
 
-            var copyResult = await SqlBulkCopy(b.ToString(), GetTempTableSchemaAndName(targetSchemaAndTable), cancellationToken,
-                columnMappings: selectColumns.ToDictionary(a => a, a => a));
+            var copyResult = await SqlBulkCopy(sqlBulkCopyQuery.ToString(), GetTempTableSchemaAndName(targetSchemaAndTable), cancellationToken,
+                columnMappings: columnMappings ?? selectColumns.Select(a => new ColumnMapping(a,a)));
 
             var mergeResult = new MergeResult();
             if (copyResult > 0)
             {
-                mergeResult = await ExecuteMergeStatement(mergeScript, cancellationToken);
+                mergeResult = await ExecuteMergeStatement(mergeScript, cancellationToken, copyAndMergeConfig?.SqlMergeConfig?.StatementTimeout ?? 3600);
             }
             else if (copyAndMergeConfig?.SqlBulkCopyConfig?.ThrowExceptionIfCopyResultsInZeroRows == true)
             {
@@ -274,8 +302,8 @@ namespace SqlBulkCopyMerge
 
         /// <inheritdoc />
         public async Task<int> SqlBulkCopy(string sourceSelectQuery, string targetTable,
-            List<SqlParameter> sqlParameters = null,
-            Dictionary<string, string> columnMappings = null,
+            IEnumerable<SqlParameter> sqlParameters = null, 
+            IEnumerable<ColumnMapping> columnMappings = null,
             SqlBulkCopyConfig sqlBulkCopyConfig = null)
         {
             return await SqlBulkCopy(sourceSelectQuery, targetTable, CancellationToken.None,
@@ -284,9 +312,9 @@ namespace SqlBulkCopyMerge
 
         /// <inheritdoc />
         public async Task<int> SqlBulkCopy(string sourceSelectQuery, string targetTable,
-            CancellationToken cancellationToken, 
-            List<SqlParameter> sqlParameters = null,
-            Dictionary<string, string> columnMappings = null,
+            CancellationToken cancellationToken,
+            IEnumerable<SqlParameter> sqlParameters = null, 
+            IEnumerable<ColumnMapping> columnMappings = null,
             SqlBulkCopyConfig sqlBulkCopyConfig = null)
         {
             var targetSchemaAndTableName = targetTable.FormatTableSchemaAndName();
@@ -324,7 +352,7 @@ namespace SqlBulkCopyMerge
             {
                 foreach (var columnMapping in columnMappings)
                 {
-                    bulkCopy.ColumnMappings.Add(columnMapping.Key, columnMapping.Value);
+                    bulkCopy.ColumnMappings.Add(columnMapping.Source, columnMapping.Target);
                 }
             }
             
@@ -336,7 +364,8 @@ namespace SqlBulkCopyMerge
         private string GenerateSqlMergeStatement(string sourceSchemaAndTable,
             string targetSchemaAndTable, 
             List<ColumnSchemaModel> sourceColumnSchemaInfo, 
-            List<ColumnSchemaModel> targetColumnSchemaInfo, 
+            List<ColumnSchemaModel> targetColumnSchemaInfo,
+            List<string> columnsToInclude = null,
             bool doNotDeleteRows = false)
         {
             var columnsToUseInMerge = new List<ColumnSchemaModel>();
@@ -344,9 +373,12 @@ namespace SqlBulkCopyMerge
             {
                 if (column.IsComputed) continue;
 
+                if (columnsToInclude?.Any() == true
+                    && !columnsToInclude.Any(a => string.Equals(a, column.Name)))
+                    continue;
+
                 if (sourceColumnSchemaInfo.Any(a =>
-                        string.Equals(a.Name, column.Name, StringComparison.InvariantCultureIgnoreCase))
-                )
+                        string.Equals(a.Name, column.Name, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     columnsToUseInMerge.Add(column);
                 }

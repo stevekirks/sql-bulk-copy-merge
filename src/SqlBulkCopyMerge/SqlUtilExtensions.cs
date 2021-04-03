@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.SqlServer.Management.Common;
+using SqlBulkCopyMerge.Models;
 
 namespace SqlBulkCopyMerge
 {
@@ -17,13 +20,13 @@ namespace SqlBulkCopyMerge
             if (r.IsMatch(table))
             {
                 var match = r.Match(table);
-                if (match.Groups.ContainsKey(regexLabelTableName)
+                if (match.Groups.Cast<Group>().ToList().Any(a => a.Name == regexLabelTableName)
                     && match.Groups[regexLabelTableName].Success
                     && !string.IsNullOrWhiteSpace(match.Groups[regexLabelTableName].Value))
                 {
                     var tableSchema = "dbo"; // default
                     var tableName = match.Groups[regexLabelTableName].Value;
-                    if (match.Groups.ContainsKey(regexLabelTableSchema)
+                    if (match.Groups.Cast<Group>().ToList().Any(a => a.Name == regexLabelTableSchema)
                         && match.Groups[regexLabelTableSchema].Success
                         && !string.IsNullOrWhiteSpace(match.Groups[regexLabelTableSchema].Value))
                     {
@@ -59,6 +62,34 @@ namespace SqlBulkCopyMerge
         {
             if (val == null) return null;
             return $"[{RemoveSquareBrackets(val)}]";
+        }
+        
+        internal static List<ColumnMapping> ValidateAndFormatColumnMappings(this List<ColumnMapping> columnMappings, List<ColumnSchemaModel> sourceColumns, List<ColumnSchemaModel> targetColumns)
+        {
+            if (columnMappings?.Any() == true)
+            {
+                // Validate column Mappings
+                foreach (var columnMapping in columnMappings)
+                {
+                    if (string.IsNullOrWhiteSpace(columnMapping.Source) ||
+                        string.IsNullOrWhiteSpace(columnMapping.Target))
+                        throw new Exception("One or more column mappings are invalid");
+
+                    columnMapping.Source = columnMapping.Source.RemoveSquareBrackets();
+                    columnMapping.Target = columnMapping.Target.RemoveSquareBrackets();
+
+                    if (!sourceColumns.Any(a => string.Equals(a.Name, columnMapping.Source, StringComparison.InvariantCultureIgnoreCase)))
+                    {
+                        throw new Exception($"Invalid Column Mappings. {columnMapping.Source} does not exist");
+                    }
+                    if (!targetColumns.Any(a => string.Equals(a.Name, columnMapping.Target, StringComparison.InvariantCultureIgnoreCase)))
+                    {
+                        throw new Exception($"Invalid Column Mappings. {columnMapping.Target} does not exist");
+                    }
+                }
+            }
+
+            return columnMappings;
         }
     }
 }

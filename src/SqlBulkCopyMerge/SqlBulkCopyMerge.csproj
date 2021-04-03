@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors>Steve Kirkegard</Authors>
     <Product>SqlBulkCopyMerge</Product>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFrameworks>netstandard2.1;net5.0</TargetFrameworks>
     <Description>Copy data from a table in one database to a table in another database. It does not TRUNCATE the target table. Uses SQLBulkCopy behind the scenes.</Description>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

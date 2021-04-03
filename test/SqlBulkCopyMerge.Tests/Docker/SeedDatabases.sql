@@ -110,6 +110,39 @@ CREATE VIEW [dbo].[vtest_copy_and_merge_subset] AS
 )
 GO
 
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'test_copy_and_merge_with_deletes_disabled')
+	DROP TABLE [dbo].[test_copy_and_merge_with_deletes_disabled]
+GO
+CREATE TABLE [dbo].[test_copy_and_merge_with_deletes_disabled](
+	[id] INT NOT NULL,
+	[notes] NVARCHAR(MAX),
+	[timestamp] DATETIME2,
+	[geom] GEOMETRY,
+	[version_control] BINARY(8)
+	CONSTRAINT [PK_test_copy_and_merge_with_deletes_disabled] PRIMARY KEY ([id])
+);
+INSERT INTO [dbo].[test_copy_and_merge_with_deletes_disabled] ( [id], [notes], [timestamp], [version_control] ) VALUES
+(2, 'Note 2 update', '2020-01-02', CONVERT(VARBINARY(8), 10000002)), 
+(3, 'Note 3 new', '2020-01-03', CONVERT(VARBINARY(8), 10000003))
+GO
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'test_copy_and_merge_with_different_column_names')
+	DROP TABLE [dbo].[test_copy_and_merge_with_different_column_names]
+GO
+CREATE TABLE [dbo].[test_copy_and_merge_with_different_column_names](
+	[id] INT NOT NULL,
+	[notes] NVARCHAR(MAX),
+	[timestamp] DATETIME2,
+	[geom] GEOMETRY,
+	[notes_2] NVARCHAR(200),
+	[version_control] BINARY(8)
+	CONSTRAINT [PK_test_copy_and_merge_with_different_column_names] PRIMARY KEY ([id])
+);
+INSERT INTO [dbo].[test_copy_and_merge_with_different_column_names] ( [id], [notes], [timestamp], [notes_2], [version_control] ) VALUES
+(1, 'Note Update', '2020-01-01', NULL, CONVERT(VARBINARY(8), 10000001)), 
+(3, 'Note New', '2020-01-03', NULL, CONVERT(VARBINARY(8), 10000003)), 
+(4, 'Note Unchanged', '2020-01-04', 'Note not included', CONVERT(VARBINARY(8), 10000004))
+GO
 
 
 -- *************************************************************************************************************************
@@ -189,6 +222,40 @@ INSERT INTO [dbo].[test_copy_and_merge_subset] ( [id], [notes], [timestamp_no_ma
 (2, 'Note 2', '2020-01-02', CONVERT(VARBINARY(8), 10000002)),
 (4, NULL, '2020-01-04', CONVERT(VARBINARY(8), 10000040)),
 (5, NULL, '2020-01-05', CONVERT(VARBINARY(8), 10000050));
+GO
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'test_copy_and_merge_with_deletes_disabled')
+	DROP TABLE [dbo].[test_copy_and_merge_with_deletes_disabled]
+GO
+CREATE TABLE [dbo].[test_copy_and_merge_with_deletes_disabled](
+	[id] INT NOT NULL,
+	[notes] NVARCHAR(MAX),
+	[timestamp] DATETIME2,
+	[geom] GEOMETRY,
+	[version_control] BINARY(8)
+	CONSTRAINT [PK_test_copy_and_merge_with_deletes_disabled] PRIMARY KEY ([id])
+);
+INSERT INTO [dbo].[test_copy_and_merge_with_deletes_disabled] ( [id], [notes], [timestamp], [version_control] ) VALUES
+(1, 'Note wont be deleted even though it doesnt exist in source', '2020-01-01', CONVERT(VARBINARY(8), 10000001)), 
+(2, 'Note 2', '2020-01-02', CONVERT(VARBINARY(8), 10000002))
+GO
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'test_copy_and_merge_with_different_column_names_d')
+	DROP TABLE [dbo].[test_copy_and_merge_with_different_column_names_d]
+GO
+CREATE TABLE [dbo].[test_copy_and_merge_with_different_column_names_d](
+	[d_id] INT NOT NULL,
+	[d_notes] NVARCHAR(200),
+	[d_timestamp] DATETIME2,
+	[d_geom] GEOMETRY,
+	[notes_2] NVARCHAR(200),
+	[d_version_control] BINARY(8)
+	CONSTRAINT [PK_test_copy_and_merge_with_different_column_names_d] PRIMARY KEY ([d_id])
+);
+INSERT INTO [dbo].[test_copy_and_merge_with_different_column_names_d] ( [d_id], [d_notes], [d_timestamp], [notes_2], [d_version_control] ) VALUES
+(1, 'Note 1', '2020-01-01', NULL, CONVERT(VARBINARY(8), 10000001)), 
+(2, 'Note 2', '2020-01-02', NULL, CONVERT(VARBINARY(8), 10000002)), 
+(4, 'Note Unchanged', '2020-01-04', 'Note not updated', CONVERT(VARBINARY(8), 10000004))
 GO
 
 
