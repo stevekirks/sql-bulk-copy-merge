@@ -1,6 +1,6 @@
 ﻿# SQL Bulk Copy & Merge
 
-This .NET library makes easier specific workflows that copy table data between SQL Server databases.
+This .NET library simplifies some common workflows that copy table data between SQL Server databases.
 
 SQLBulkCopy is useful to copy between databases, but truncating the destination table each time before copying is not always possible or efficient.
 An alternative workflow is to use SQLBulkCopy to copy to a temporary table and then run SQL MERGE between the temporary table and target.
