@@ -30,7 +30,17 @@ jobs:
         name: packaged
         path: packaged
         
-    - name: Test
-      run: |
-          echo "Attempts"
-          echo "1 $RELEASE_VERSION"
+    - name: Create github release and git tag for release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        release_name: $RELEASE_VERSION
+        tag_name: v$RELEASE_VERSION
+        draft: false
+        prerelease: false
+        
+    - name: Push to Nuget
+      run: dotnet nuget push packaged/stevekirks.SqlBulkCopyMerge.$RELEASE_VERSION.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+
