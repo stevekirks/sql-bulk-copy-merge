@@ -34,7 +34,3 @@ jobs:
       run: |
           echo "Attempts"
           echo "1 $RELEASE_VERSION"
-          echo "2 ${{ env.RELEASE_VERSION }}"
-          echo "3 ${RELEASE_VERSION}"
-          echo "4 ${{RELEASE_VERSION}}"
-   
