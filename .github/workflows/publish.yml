@@ -1,6 +1,6 @@
 name: Publish
 env:
-  release_version: 0.0.${{github.run_number}}
+  RELEASE_VERSION: 0.0.${{github.run_number}}
 
 on:
   workflow_dispatch:
@@ -23,23 +23,18 @@ jobs:
       run: dotnet test --no-build --verbosity normal
         
     - name: Pack
-      run: dotnet pack src/SqlBulkCopyMerge/SqlBulkCopyMerge.csproj -o packaged -c Release -p:PackageVersion=$release_version -p:PackageID=stevekirks.SqlBulkCopyMerge
+      run: dotnet pack src/SqlBulkCopyMerge/SqlBulkCopyMerge.csproj -o packaged -c Release -p:PackageVersion=$RELEASE_VERSION -p:PackageID=stevekirks.SqlBulkCopyMerge
     - name: Upload Artifact
       uses: actions/upload-artifact@v1
       with:
         name: packaged
         path: packaged
         
-    - name: Create github release and git tag for release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        release_name: ${release_version}
-        tag_name: v${release_version}
-        draft: false
-        prerelease: false
-        
-    - name: Push to Nuget
-      run: dotnet nuget push packaged/SqlBulkCopyMerge.$release_version.nupkg -k ${{ secrets.nuget_api_key }} -s https://api.nuget.org/v3/index.json
+    - name: Test
+      run: |
+          echo "Attempts"
+          echo $RELEASE_VERSION
+          echo ${{ env.RELEASE_VERSION }}
+          echo ${RELEASE_VERSION}
+          echo ${{RELEASE_VERSION}}
+   
