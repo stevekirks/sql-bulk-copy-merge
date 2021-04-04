@@ -15,21 +15,53 @@ GO
 -- *************************************************************************************************************************
 USE [sourcedb]
 
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'test_copying_latest_rows')
-	DROP TABLE [dbo].[test_copying_latest_rows]
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'test_copying_latest_rows_by_int')
+	DROP TABLE [dbo].[test_copying_latest_rows_by_int]
 GO
-CREATE TABLE [dbo].[test_copying_latest_rows](
+CREATE TABLE [dbo].[test_copying_latest_rows_by_int](
 	[id] INT NOT NULL,
 	[notes] NVARCHAR(MAX),
 	[timestamp] DATETIME2,
 	[version_control] BINARY(8)
-	CONSTRAINT [PK_test_copying_latest_rows] PRIMARY KEY ([id])
+	CONSTRAINT [PK_test_copying_latest_rows_by_int] PRIMARY KEY ([id])
 );
-INSERT INTO [dbo].[test_copying_latest_rows] ( [id], [notes], [timestamp], [version_control] ) VALUES
-(30, 'Note', '2020-01-01', CONVERT(VARBINARY(8), 10000001)), 
-(2, 'Note', '2020-01-30', CONVERT(VARBINARY(8), 10000001)),
-(3, 'Note', '2020-02-01', CONVERT(VARBINARY(8), 10000001)),
-(4, NULL, '2020-01-01', CONVERT(VARBINARY(8), 10000030));
+INSERT INTO [dbo].[test_copying_latest_rows_by_int] ( [id], [notes], [timestamp], [version_control] ) VALUES
+(1, 'Note 1', '2020-01-01', CONVERT(VARBINARY(8), 10000001)), 
+(2, 'Note 2', '2020-01-01', CONVERT(VARBINARY(8), 10000001)),
+(3, 'Note 3', '2020-02-01', CONVERT(VARBINARY(8), 10000001)),
+(4, 'Note 4', '2020-01-01', CONVERT(VARBINARY(8), 10000001));
+GO
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'test_copying_latest_rows_by_date')
+	DROP TABLE [dbo].[test_copying_latest_rows_by_date]
+GO
+CREATE TABLE [dbo].[test_copying_latest_rows_by_date](
+	[id] INT NOT NULL,
+	[notes] NVARCHAR(MAX),
+	[timestamp] DATETIME2,
+	[version_control] BINARY(8)
+);
+INSERT INTO [dbo].[test_copying_latest_rows_by_date] ( [id], [notes], [timestamp], [version_control] ) VALUES
+(1, 'Note 1', '2020-01-01', CONVERT(VARBINARY(8), 10000001)), 
+(1, 'Note 2', '2020-01-02', CONVERT(VARBINARY(8), 10000001)),
+(1, 'Note 3', '2020-02-03', CONVERT(VARBINARY(8), 10000001)),
+(1, 'Note 4', '2020-01-04', CONVERT(VARBINARY(8), 10000001));
+GO
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'test_copying_latest_rows_by_binary')
+	DROP TABLE [dbo].[test_copying_latest_rows_by_binary]
+GO
+CREATE TABLE [dbo].[test_copying_latest_rows_by_binary](
+	[id] INT NOT NULL,
+	[notes] NVARCHAR(MAX),
+	[timestamp] DATETIME2,
+	[version_control] BINARY(8)
+);
+INSERT INTO [dbo].[test_copying_latest_rows_by_binary] ( [id], [notes], [timestamp], [version_control] ) VALUES
+(1, 'Note 1', '2020-01-01', CONVERT(VARBINARY(8), 00000001)), 
+(1, 'Note 2', '2020-01-01', CONVERT(VARBINARY(8), 00000002)),
+(1, 'Note 3', '2020-02-01', CONVERT(VARBINARY(8), 00000003)),
+(1, 'Note 4', '2020-01-01', CONVERT(VARBINARY(8), 00000004));
 GO
 
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'test_copying_latest_rows_from_view')
@@ -82,9 +114,9 @@ CREATE TABLE [dbo].[test_copy_and_merge](
 	CONSTRAINT [PK_test_copy_and_merge] PRIMARY KEY ([id])
 );
 INSERT INTO [dbo].[test_copy_and_merge] ( [id], [notes], [timestamp], [version_control] ) VALUES
-(1, 'Note 1', '2020-01-01', CONVERT(VARBINARY(8), 10000001)), 
+(1, 'Note 1 unchanged', '2020-01-01', CONVERT(VARBINARY(8), 10000001)), 
 (2, 'Note 2 overwrite', '2020-01-02', CONVERT(VARBINARY(8), 10000002)),
-(3, 'Note 3', '2020-01-03', CONVERT(VARBINARY(8), 10000003)),
+(3, 'Note 3 new', '2020-01-03', CONVERT(VARBINARY(8), 10000003)),
 (4, NULL, '2020-01-04', CONVERT(VARBINARY(8), 10000004));
 GO
 
@@ -122,7 +154,7 @@ CREATE TABLE [dbo].[test_copy_and_merge_with_deletes_disabled](
 	CONSTRAINT [PK_test_copy_and_merge_with_deletes_disabled] PRIMARY KEY ([id])
 );
 INSERT INTO [dbo].[test_copy_and_merge_with_deletes_disabled] ( [id], [notes], [timestamp], [version_control] ) VALUES
-(2, 'Note 2 update', '2020-01-02', CONVERT(VARBINARY(8), 10000002)), 
+(2, 'Note 2 updated', '2020-01-02', CONVERT(VARBINARY(8), 10000002)), 
 (3, 'Note 3 new', '2020-01-03', CONVERT(VARBINARY(8), 10000003))
 GO
 
@@ -144,22 +176,61 @@ INSERT INTO [dbo].[test_copy_and_merge_with_different_column_names] ( [id], [not
 (4, 'Note Unchanged', '2020-01-04', 'Note not included', CONVERT(VARBINARY(8), 10000004))
 GO
 
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'test_copy_and_merge_where_source_is_empty')
+	DROP TABLE [dbo].[test_copy_and_merge_where_source_is_empty]
+GO
+CREATE TABLE [dbo].[test_copy_and_merge_where_source_is_empty](
+	[id] INT NOT NULL,
+	[notes] NVARCHAR(MAX)
+	CONSTRAINT [PK_test_copy_and_merge_where_source_is_empty] PRIMARY KEY ([id])
+);
+GO
+
 
 -- *************************************************************************************************************************
 USE [targetdb]
 
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'test_copying_latest_rows')
-	DROP TABLE [dbo].[test_copying_latest_rows]
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'test_copying_latest_rows_by_int')
+	DROP TABLE [dbo].[test_copying_latest_rows_by_int]
 GO
-CREATE TABLE [dbo].[test_copying_latest_rows](
+CREATE TABLE [dbo].[test_copying_latest_rows_by_int](
 	[id] INT NOT NULL,
-	[version_control] BINARY(8),
-	[timestamp] DATETIME2,
 	[notes] NVARCHAR(MAX),
-	CONSTRAINT [PK_test_copying_latest_rows] PRIMARY KEY ([id])
+	[timestamp] DATETIME2,
+	[version_control] BINARY(8)
+	CONSTRAINT [PK_test_copying_latest_rows_by_int] PRIMARY KEY ([id])
 );
-INSERT INTO [dbo].[test_copying_latest_rows] ( [id], [notes], [timestamp], [version_control] ) VALUES
-(29, 'Note 29', '2020-01-29', CONVERT(VARBINARY(8), 10000029));
+INSERT INTO [dbo].[test_copying_latest_rows_by_int] ( [id], [notes], [timestamp], [version_control] ) VALUES
+(1, 'Note 1', '2020-01-01', CONVERT(VARBINARY(8), 10000001)), 
+(2, 'Note 2', '2020-01-01', CONVERT(VARBINARY(8), 10000001)),
+(3, 'Note 3', '2020-02-01', CONVERT(VARBINARY(8), 10000001));
+GO
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'test_copying_latest_rows_by_date')
+	DROP TABLE [dbo].[test_copying_latest_rows_by_date]
+GO
+CREATE TABLE [dbo].[test_copying_latest_rows_by_date](
+	[id] INT NOT NULL,
+	[notes] NVARCHAR(MAX),
+	[timestamp] DATETIME2,
+	[version_control] BINARY(8)
+);
+INSERT INTO [dbo].[test_copying_latest_rows_by_date] ( [id], [notes], [timestamp], [version_control] ) VALUES
+(1, 'Note 1', '2020-01-01', CONVERT(VARBINARY(8), 10000001));
+GO
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'test_copying_latest_rows_by_binary')
+	DROP TABLE [dbo].[test_copying_latest_rows_by_binary]
+GO
+CREATE TABLE [dbo].[test_copying_latest_rows_by_binary](
+	[id] INT NOT NULL,
+	[notes] NVARCHAR(MAX),
+	[timestamp] DATETIME2,
+	[version_control] BINARY(8)
+);
+INSERT INTO [dbo].[test_copying_latest_rows_by_binary] ( [id], [notes], [timestamp], [version_control] ) VALUES
+(1, 'Note 1', '2020-01-01', CONVERT(VARBINARY(8), 00000001)), 
+(1, 'Note 2', '2020-01-01', CONVERT(VARBINARY(8), 00000002));
 GO
 
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'test_copying_latest_rows_from_view')
@@ -201,10 +272,10 @@ CREATE TABLE [dbo].[test_copy_and_merge](
 	CONSTRAINT [PK_test_copy_and_merge] PRIMARY KEY ([id])
 );
 INSERT INTO [dbo].[test_copy_and_merge] ( [id], [notes], [timestamp], [version_control] ) VALUES
-(1, 'Note 1', '2020-01-01', CONVERT(VARBINARY(8), 10000001)), 
+(1, 'Note 1 unchanged', '2020-01-01', CONVERT(VARBINARY(8), 10000001)), 
 (2, 'Note 2', '2020-01-02', CONVERT(VARBINARY(8), 10000002)),
 (4, NULL, '2020-01-04', CONVERT(VARBINARY(8), 10000040)),
-(5, NULL, '2020-01-05', CONVERT(VARBINARY(8), 10000050));
+(5, 'Note 5 deleted', '2020-01-05', CONVERT(VARBINARY(8), 10000050));
 GO
 
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'test_copy_and_merge_subset')
@@ -256,6 +327,18 @@ INSERT INTO [dbo].[test_copy_and_merge_with_different_column_names_d] ( [d_id], 
 (1, 'Note 1', '2020-01-01', NULL, CONVERT(VARBINARY(8), 10000001)), 
 (2, 'Note 2', '2020-01-02', NULL, CONVERT(VARBINARY(8), 10000002)), 
 (4, 'Note Unchanged', '2020-01-04', 'Note not updated', CONVERT(VARBINARY(8), 10000004))
+GO
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'test_copy_and_merge_where_source_is_empty')
+	DROP TABLE [dbo].[test_copy_and_merge_where_source_is_empty]
+GO
+CREATE TABLE [dbo].[test_copy_and_merge_where_source_is_empty](
+	[id] INT NOT NULL,
+	[notes] NVARCHAR(MAX)
+	CONSTRAINT [PK_test_copy_and_merge_where_source_is_empty] PRIMARY KEY ([id])
+);
+INSERT INTO [dbo].[test_copy_and_merge_where_source_is_empty] ( [id], [notes] ) VALUES
+(1, 'Note 1 not deleted')
 GO
 
 

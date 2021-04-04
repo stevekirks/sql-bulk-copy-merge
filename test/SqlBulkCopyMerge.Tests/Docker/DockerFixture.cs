@@ -49,7 +49,7 @@ namespace SqlBulkCopyMerge.Tests.Docker
 
         public void Dispose()
         {
-            _dockerSetup.RemoveDockerContainer();
+            //_dockerSetup.RemoveDockerContainer();
         }
     }
 }

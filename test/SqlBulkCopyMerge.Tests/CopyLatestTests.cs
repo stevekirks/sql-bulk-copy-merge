@@ -24,22 +24,110 @@ namespace SqlBulkCopyMerge.Tests
         }
 
         [Fact]
-        public async Task CopiesLatestRows()
+        public async Task CopiesLatestRowsByInt()
         {
-            var sourceTable = "[dbo].[test_copying_latest_rows]";
+            var sourceTable = "[dbo].[test_copying_latest_rows_by_int]";
             var targetTable = sourceTable;
-            var resultById = await _sqlBulkCopyCautiouslyService.CopyLatest(sourceTable, targetTable);
-            Assert.Equal(1, resultById);
-            
-            var byDateColumn = "[timestamp]";
-            var resultByDate = await _sqlBulkCopyCautiouslyService.CopyLatest(sourceTable, targetTable, byDateColumn);
-            Assert.Equal(2, resultByDate);
+            var rowCount = await _sqlBulkCopyCautiouslyService.CopyLatest(sourceTable, targetTable);
+            Assert.Equal(1, rowCount);
 
-            var byVersionControlColumn = "[version_control]";
-            var resultByVersionControl = await _sqlBulkCopyCautiouslyService.CopyLatest(sourceTable, targetTable, byVersionControlColumn);
-            Assert.Equal(1, resultByVersionControl);
+            var targetRows = await TestUtils.QueryTable(_dockerFixture.TargetSqlDbConnectionString,
+                $"SELECT [id], [notes], [timestamp] FROM {targetTable}");
+            Assert.Collection(targetRows, row =>
+            {
+                Assert.Equal(1, row[0]);
+                Assert.Equal("Note 1", row[1]);
+                Assert.Equal(1, ((DateTime)row[2]).Day);
+            }, row =>
+            {
+                Assert.Equal(2, row[0]);
+                Assert.Equal("Note 2", row[1]);
+                Assert.Equal(1, ((DateTime)row[2]).Day);
+            }, row =>
+            {
+                Assert.Equal(3, row[0]);
+                Assert.Equal("Note 3", row[1]);
+                Assert.Equal(1, ((DateTime)row[2]).Day);
+            }, row =>
+            {
+                Assert.Equal(4, row[0]);
+                Assert.Equal("Note 4", row[1]);
+                Assert.Equal(1, ((DateTime)row[2]).Day);
+            });
         }
-        
+
+        [Fact]
+        public async Task CopiesLatestRowsByDate()
+        {
+            var sourceTable = "[dbo].[test_copying_latest_rows_by_date]";
+            var targetTable = sourceTable;
+            var keyColumn = "[timestamp]";
+            var rowCount = await _sqlBulkCopyCautiouslyService.CopyLatest(sourceTable, targetTable, keyColumn);
+            Assert.Equal(3, rowCount);
+
+            var targetRows = await TestUtils.QueryTable(_dockerFixture.TargetSqlDbConnectionString,
+                $"SELECT [id], [notes], [timestamp] FROM {targetTable}");
+            Assert.Collection(targetRows, row =>
+            {
+                Assert.Equal(1, row[0]);
+                Assert.Equal("Note 1", row[1]);
+                Assert.Equal(1, ((DateTime)row[2]).Day);
+            }, row =>
+            {
+                Assert.Equal(1, row[0]);
+                Assert.Equal("Note 2", row[1]);
+                Assert.Equal(2, ((DateTime)row[2]).Day);
+            }, row =>
+            {
+                Assert.Equal(1, row[0]);
+                Assert.Equal("Note 3", row[1]);
+                Assert.Equal(3, ((DateTime)row[2]).Day);
+            }, row =>
+            {
+                Assert.Equal(1, row[0]);
+                Assert.Equal("Note 4", row[1]);
+                Assert.Equal(4, ((DateTime)row[2]).Day);
+            });
+        }
+
+        [Fact]
+        public async Task CopiesLatestRowsByBinary()
+        {
+            var sourceTable = "[dbo].[test_copying_latest_rows_by_binary]";
+            var targetTable = sourceTable;
+            var keyColumn = "[version_control]";
+            var rowCount = await _sqlBulkCopyCautiouslyService.CopyLatest(sourceTable, targetTable, keyColumn);
+            Assert.Equal(2, rowCount);
+
+            var targetRows = await TestUtils.QueryTable(_dockerFixture.TargetSqlDbConnectionString,
+                $"SELECT [id], [notes], [timestamp], [version_control] FROM {targetTable}");
+            Assert.Collection(targetRows, row =>
+            {
+                Assert.Equal(1, row[0]);
+                Assert.Equal("Note 1", row[1]);
+                Assert.Equal(1, ((DateTime)row[2]).Day);
+                Assert.Equal(1, ((byte[])row[3])[3]);
+            }, row =>
+            {
+                Assert.Equal(1, row[0]);
+                Assert.Equal("Note 2", row[1]);
+                Assert.Equal(1, ((DateTime)row[2]).Day);
+                Assert.Equal(2, ((byte[])row[3])[3]);
+            }, row =>
+            {
+                Assert.Equal(1, row[0]);
+                Assert.Equal("Note 3", row[1]);
+                Assert.Equal(1, ((DateTime)row[2]).Day);
+                Assert.Equal(3, ((byte[])row[3])[3]);
+            }, row =>
+            {
+                Assert.Equal(1, row[0]);
+                Assert.Equal("Note 4", row[1]);
+                Assert.Equal(1, ((DateTime)row[2]).Day);
+                Assert.Equal(4, ((byte[])row[3])[3]);
+            });
+        }
+
         [Fact]
         public async Task CopiesLatestRowsFromView()
         {

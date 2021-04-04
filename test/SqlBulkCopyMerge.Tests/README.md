@@ -1,1 +1,1 @@
-﻿Docker is required as these tests run a docker container.
+﻿Docker is required as somes tests run a docker container.
