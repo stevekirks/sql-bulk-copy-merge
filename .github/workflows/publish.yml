@@ -1,11 +1,8 @@
 name: Publish
 env:
-  release_version: ${{GITHUB_REF#refs/*/}}
+  RELEASE_VERSION: 0.0.${{github.run_number}}
 
 on:
-  release:
-    types: [published]
-
   workflow_dispatch:
 
 jobs:
@@ -14,6 +11,36 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Check output
-      run: |
-        echo $release_version
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+        
+    - name: Pack
+      run: dotnet pack src/SqlBulkCopyMerge/SqlBulkCopyMerge.csproj -o packaged -c Release -p:PackageVersion=$RELEASE_VERSION -p:PackageID=stevekirks.SqlBulkCopyMerge
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: packaged
+        path: packaged
+        
+    - name: Create github release and git tag for release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        release_name: ${{ env.RELEASE_VERSION }}
+        tag_name: v${{ env.RELEASE_VERSION }}
+        draft: false
+        prerelease: false
+        
+    - name: Push to Nuget
+      run: dotnet nuget push packaged/stevekirks.SqlBulkCopyMerge.$RELEASE_VERSION.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+
