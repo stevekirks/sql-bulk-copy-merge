@@ -1,6 +1,6 @@
 ﻿# SQL Bulk Copy & Merge
 
-This library aims to make easier and more efficient specific workflows in .NET that copy table data between SQL databases.
+This library aims to make easier specific workflows in .NET that copy table data between SQL Server databases.
 
 SQLBulkCopy is useful to copy between databases, but truncating the destination table each time before copying is not always possible or efficient.
 An alternative workflow is to use SQLBulkCopy to copy to a temporary table and then run SQL MERGE between the temporary table and target.
@@ -57,8 +57,9 @@ Console.WriteLine("Rows Copied: " + result.RowsCopied);
 ```
 
 ## Notes
-For the connections, the Source database requires READER permission, the Target database requires READER + WRITER + CREATE TABLE + EXECUTE permissions.
+Source database connection requires READER permission.
+Target database connection requires READER + WRITER + CREATE TABLE + EXECUTE permissions.
 
 Tested on SQL Server 2019.
 
-Spatial types (Geometry, Geography) are unsupported because SQLBulkCopy does not support them.
+Spatial types (Geometry, Geography) are unsupported because SQLBulkCopy does not support them. The library ignores unsupported columns.
