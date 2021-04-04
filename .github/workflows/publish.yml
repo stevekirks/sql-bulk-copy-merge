@@ -23,7 +23,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal
         
     - name: Pack
-      run: dotnet pack src/SqlBulkCopyMerge/SqlBulkCopyMerge.csproj -o packaged -c Release -p:PackageVersion=$release_version
+      run: dotnet pack src/SqlBulkCopyMerge/SqlBulkCopyMerge.csproj -o packaged -c Release -p:PackageVersion=$release_version -p:PackageID=stevekirks.SqlBulkCopyMerge
     - name: Upload Artifact
       uses: actions/upload-artifact@v1
       with:
@@ -36,12 +36,10 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        release_name: $release_version
-        tag_name: v$release_version
+        release_name: ${release_version}
+        tag_name: v${release_version}
         draft: false
         prerelease: false
         
     - name: Push to Nuget
-      env:
-        nuget_api_key: ${{ secrets.nuget_api_key }}
-      run: dotnet nuget push packaged/SqlBulkCopyMerge.$release_version.nupkg -k $nuget_api_key -s https://api.nuget.org/v3/index.json
+      run: dotnet nuget push packaged/SqlBulkCopyMerge.$release_version.nupkg -k ${{ secrets.nuget_api_key }} -s https://api.nuget.org/v3/index.json
