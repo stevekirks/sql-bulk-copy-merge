@@ -4,7 +4,7 @@
     <Authors>Steve Kirkegard</Authors>
     <Product>SqlBulkCopyMerge</Product>
     <TargetFrameworks>netstandard2.1;net5.0</TargetFrameworks>
-    <Description>This library aims to make easier and more efficient specific workflows in .NET that copy table data between SQL databases.</Description>
+    <Description>This .NET library makes easier specific workflows that copy table data between SQL Server databases.</Description>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
