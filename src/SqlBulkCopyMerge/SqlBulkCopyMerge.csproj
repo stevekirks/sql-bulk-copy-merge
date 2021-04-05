@@ -7,6 +7,7 @@
     <Description>Aims to simplify two common workflows that copy table data between SQL Server databases</Description>
     <PackageProjectUrl>https://github.com/stevekirks/sql-bulk-copy-merge</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>sqlbulkcopy;sqlmerge;sqlserver</PackageTags>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
