@@ -15,7 +15,7 @@ using SqlBulkCopyMerge.Models;
 namespace SqlBulkCopyMerge
 {
     /// <summary>
-    /// Copy data from a table in one database to a table in another database without truncating
+    /// Simplify common workflows that copy table data between SQL Server databases
     /// </summary>
     public interface ISqlBulkCopyMergeService
     {
@@ -92,7 +92,8 @@ namespace SqlBulkCopyMerge
         Task<int> CopyLatest(string sourceTable, string targetTable, CancellationToken cancellationToken, string keyColumnName = null, List<ColumnMapping> columnMappings = null, SqlBulkCopyConfig sqlBulkCopyConfig = null);
 
         /// <summary>
-        /// SQL Bulk Copy
+        /// SQL Bulk Copy<br/>
+        /// This method is used internally but is public as it may be suitable for other uses.
         /// </summary>
         /// <param name="sourceSelectQuery"></param>
         /// <param name="targetTable"></param>
@@ -106,7 +107,8 @@ namespace SqlBulkCopyMerge
             SqlBulkCopyConfig sqlBulkCopyConfig = null);
 
         /// <summary>
-        /// SQL Bulk Copy
+        /// SQL Bulk Copy<br/>
+        /// This method is used internally but is public as it may be suitable for other uses.
         /// </summary>
         /// <param name="sourceSelectQuery"></param>
         /// <param name="targetTable"></param>
@@ -130,8 +132,13 @@ namespace SqlBulkCopyMerge
         private readonly ILogger _logger;
 
         /// <summary>
-        /// Copy data from a table in one database to a table in another database without truncating
+        /// Simplify common workflows that copy table data between SQL Server databases
         /// </summary>
+        /// <param name="sourceDbConnectionString">Source database connection string.<br/>
+        /// Requires READER permission.</param>
+        /// <param name="targetDbConnectionString">Target database connection string.<br/>
+        /// Requires READER + WRITER + CREATE TABLE + EXECUTE permissions.</param>
+        /// <param name="logger">Inject an optional logger</param>
         public SqlBulkCopyMergeService(string sourceDbConnectionString, string targetDbConnectionString, ILogger logger = null)
         {
             _sourceDbConnectionString = sourceDbConnectionString;

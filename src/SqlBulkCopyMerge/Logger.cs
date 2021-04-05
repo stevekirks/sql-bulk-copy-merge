@@ -37,7 +37,7 @@ namespace SqlBulkCopyMerge
         }
     }
 
-    public class EmptyLogger : ILogger
+    internal class EmptyLogger : ILogger
     {
         public void Verbose(string message, params object[] args)
         {
