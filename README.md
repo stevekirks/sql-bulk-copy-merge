@@ -1,10 +1,6 @@
 ﻿# SQL Bulk Copy & Merge
 
-This .NET library simplifies some common workflows that copy table data between SQL Server databases.
-
-SQLBulkCopy is useful to copy between databases, but truncating the destination table each time before copying is not always possible or efficient.
-An alternative workflow is to use SQLBulkCopy to copy to a temporary table and then run SQL MERGE between the temporary table and target.
-Some other solutions that do this require extra work defining the table schemas or are dependant on a SQL stored proc.
+This .NET library aims to simplify two common workflows that copy table data between SQL Server databases.
 
 ## Workflows
 This library has the following workflows.
@@ -12,13 +8,15 @@ This library has the following workflows.
 ### Copy & Merge
 Uses SQLBulkCopy to copy data from a table or view in the source database to a temporary table in the target database before running SQL MERGE from the temporary table to the destination table.
 
+This solution can be used instead of truncating the table each time before copying, which is not always possible or efficient.
+Some other solutions that do this require defining the table schemas or are dependant on a SQL stored proc.
+
 The specific steps it performs:
 -   Checks target schema and table exists. If not, creates them
--   Create temp table (target table name appended with '_temp'
--   Generate MERGE statement with the temp table as source and targetTable as target
--   Copy from table in source db to temp table in target db
--   Run MERGE statement
--   Drop the temp table
+-   Creates temp table (target table name appended with '_temp')
+-   Copies from table in source db to temp table in target db using SQLBulkCopy
+-   Runs a SQL MERGE with the temp table as source and targetTable as target
+-   Drops the temp table
 
 #### Usage:
 ```
@@ -41,14 +39,14 @@ var result = await copyService.CopyAndMerge(sourceTableOrView, targetTable, colu
 
 ### Copy Latest
 For source tables that are only ever added to it is more efficient to copy only the new rows into the target table.
-This method copies the latest data determined by the keyColumnName.
+This method copies the latest data determined by a key column.
 
-A query is made on the target for the latest keyColumnName value, and then source is queried where the keyColumnName value is greater than the latest in the target.
-Eg. if the keyColumnName is [id], and its latest value is 2, then only rows with an [id] value greater than 2 are copied.
-
-If no keyColumnName is specified, the primary key is used. If more than one primary key, the first is used.
-
-The result of the source query is directly copied into the target table using SQLBulkCopy.
+The specific steps it performs:
+-   Queries target table for the latest key column value.
+    If no key column is specified, the primary key is used. If more than one primary key, the first is used.
+-   Queries source where the key column value is greater than the latest in the target.
+    Eg. if the key column is [id], and its latest value is 2, then only rows with an [id] value greater than 2 are copied.
+-   Copies from table in source db directly into table in target db using SQLBulkCopy.
 
 #### Usage:
 ```
