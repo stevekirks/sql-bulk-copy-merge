@@ -1,9 +1,6 @@
-﻿# SQL Bulk Copy & Merge
+﻿# SQL Bulk Copy & Merge [![CI](https://github.com/stevekirks/sql-bulk-copy-merge/actions/workflows/ci.yml/badge.svg)](https://github.com/stevekirks/sql-bulk-copy-merge/actions/workflows/ci.yml) [![NuGet Version](http://img.shields.io/nuget/v/SqlBulkCopyMerge.svg?style=flat)](https://www.nuget.org/packages/SqlBulkCopyMerge/)
 
 This .NET library aims to simplify two common workflows that copy table data between SQL Server databases.
-
-[![CI](https://github.com/stevekirks/sql-bulk-copy-merge/actions/workflows/ci.yml/badge.svg)](https://github.com/stevekirks/sql-bulk-copy-merge/actions/workflows/ci.yml)
-[![NuGet Version](http://img.shields.io/nuget/v/SqlBulkCopyMerge.svg?style=flat)](https://www.nuget.org/packages/SqlBulkCopyMerge/)
 
 ## Workflows
 This library has the following workflows.
