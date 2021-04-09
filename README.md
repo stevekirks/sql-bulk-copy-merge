@@ -3,7 +3,6 @@
 This .NET library aims to simplify two common workflows that copy table data between SQL Server databases.
 
 ## Workflows
-The workflows are.
 
 ### Copy & Merge
 Uses SQLBulkCopy to copy data from a table or view in the source database to a temporary table in the target database before running SQL MERGE from the temporary table to the destination table.
